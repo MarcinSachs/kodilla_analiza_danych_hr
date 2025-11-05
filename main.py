@@ -10,6 +10,7 @@ def main():
     df = pd.read_csv('HRDataset.csv')
     df = utils.preprocess_data(df)
 
+    print(utils.get_employee_counts(df))
     # ręczna analiza
     utils.analyze_manager_performance(df)
     # test chi2
