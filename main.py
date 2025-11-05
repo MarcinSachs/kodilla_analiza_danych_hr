@@ -9,9 +9,21 @@ import utils
 def main():
     df = pd.read_csv('HRDataset.csv')
     df = utils.preprocess_data(df)
-    df.head()
-    sns.set_style('darkgrid')
-    df.pivot_table(index=df['PerfScoreID'], columns=df['ManagerID'], values='EmpID',aggfunc='count').fillna(0)
+
+    # ręczna analiza
+    utils.analyze_manager_performance(df)
+    # test chi2
+    chi2_results = utils.analyze_manager_performance_chi2(df)
+
+    # Sprawdzenie czy p-value nie jest None
+    if chi2_results and chi2_results[1] is not None:
+        chi2, p, dof, expected, cramer_v = chi2_results
+        alpha = 0.05  # Poziom istotności
+        if p < alpha:
+            print("Odrzucamy hipotezę zerową. Istnieje statystycznie istotna zależność między ManagerName a PerfScoreID.")
+        else:
+            print("Nie ma podstaw do odrzucenia hipotezy zerowej. Brak statystycznie istotnej zależności między ManagerName a PerfScoreID.")
+
 
 if __name__ == "__main__":
     main()
