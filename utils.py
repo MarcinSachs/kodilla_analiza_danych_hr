@@ -170,10 +170,35 @@ def analyze_recruitment_source_seniority(df):
     plt.show()
 
 def analyze_martial_status_satisfaction_corelation(df):
-    # Usunięcie wierszy z brakującymi danymi w MartialDesc lub EmpSatisfaction
+    """
+    Analizuje związek między stanem cywilnym a zadowoleniem z pracy.
+    Wyświetla surowe liczby, procentowy rozkład i wizualizuje wyniki heatmapą.
+    """
+    # Usunięcie wierszy z brakującymi danymi w MaritalDesc lub EmpSatisfaction
     df_cleaned = df.dropna(subset=['MaritalDesc', 'EmpSatisfaction'])
     if df_cleaned.empty:
-        print("Brak danych do analizy po usunięciu brakujących wartości.")
+        print("Brak danych do analizy po usunięciu brakujących wartości dla stanu cywilnego i satysfakcji.")
         return
-    # Grupowanie
-    satisfaction_groups = df_cleaned.groupby('MaritalDesc')['EmpSatisfaction'].value_counts()
+
+    # 1. Wyświetlenie surowych liczebności
+    satisfaction_counts = df_cleaned.groupby('MaritalDesc')['EmpSatisfaction'].value_counts().sort_index()
+    print("\n--- Surowe liczby pracowników dla każdego poziomu satysfakcji w zależności od stanu cywilnego ---")
+    print(satisfaction_counts)
+
+    # 2. Obliczenie procentowego rozkładu satysfakcji w obrębie każdej grupy stanu cywilnego
+    # 'normalize=True' oblicza proporcje w obrębie grupy (na wiersz)
+    satisfaction_percentages = df_cleaned.groupby('MaritalDesc')['EmpSatisfaction'].value_counts(normalize=True).mul(100).unstack(fill_value=0)
+    # Posortowanie kolumn (poziomów satysfakcji) dla lepszej czytelności
+    satisfaction_percentages = satisfaction_percentages.reindex(columns=sorted(satisfaction_percentages.columns))
+
+    print("\n--- Procentowy rozkład poziomów satysfakcji z pracy w zależności od stanu cywilnego (wiersze sumują się do 100%) ---")
+    print(satisfaction_percentages.round(2))
+
+    # 3. Wizualizacja procentowego rozkładu za pomocą heatmapy
+    plt.figure(figsize=(12, 7))
+    sns.heatmap(satisfaction_percentages, annot=True, fmt=".1f", cmap="YlGnBu", linewidths=.5, cbar_kws={'label': 'Procent'})
+    plt.title('Procentowy rozkład satysfakcji z pracy w zależności od stanu cywilnego', fontsize=16)
+    plt.xlabel('Poziom Satysfakcji z Pracy (1=bardzo niska, 5=bardzo wysoka)', fontsize=12)
+    plt.ylabel('Stan Cywilny', fontsize=12)
+    plt.tight_layout()
+    plt.show()

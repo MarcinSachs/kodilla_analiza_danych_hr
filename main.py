@@ -24,14 +24,14 @@ def main():
             print("Odrzucamy hipotezę zerową. Istnieje statystycznie istotna zależność między ManagerName a PerfScoreID.")
         else:
             print("Nie ma podstaw do odrzucenia hipotezy zerowej. Brak statystycznie istotnej zależności między ManagerName a PerfScoreID.")
-    # Dodanie kolumny z dugocia stazu
+    # Dodanie kolumny z dugoscia stazu
     df = utils.add_seniority(df)
 
     # Analiza stażu
     utils.analyze_recruitment_source_seniority(df)
 
-    
-    print(utils.analyze_martial_status_satisfaction_corelation(df))
+    # Analiza korelacji miedzy stanem cywilnym a zadowolenia z pracy
+    utils.analyze_martial_status_satisfaction_corelation(df)
 
 
 
