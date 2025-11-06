@@ -17,4 +17,6 @@ Careerbuilder
 Stan cywilny ma widoczny związek z rozkładem zadowolenia z pracy, a grupy takie jak Widowed, Divorced i Single wydają się być proporcjonalnie bardziej zadowolone niż grupa Married.
 
 4. Jak wygląda struktura wieku aktualnie zatrudnionych pracowników?
+Najmłodszy pracownik ma 27 lat, najstarszy 50 a średnia wieku osób aktualnie pracujących to 37,22 lat.
+
 5. Czy starsi pracownicy pracują nad większą liczbą specjalnych projektów niż młodsi pracownicy?

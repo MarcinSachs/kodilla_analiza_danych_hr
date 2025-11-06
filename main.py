@@ -33,7 +33,8 @@ def main():
     # Analiza korelacji miedzy stanem cywilnym a zadowolenia z pracy
     utils.analyze_martial_status_satisfaction_corelation(df)
 
-
+    # Analiza struktury wieku pracowników
+    utils.analyse_age_still_working_employees(df)
 
 if __name__ == "__main__":
     main()

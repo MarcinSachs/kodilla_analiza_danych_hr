@@ -113,7 +113,7 @@ def analyze_manager_performance_chi2(df):
 def count_seniority(row):
 
     if pd.isnull(row['DateofTermination']):
-        end_date = dt.datetime(2019,9,27)
+        end_date = dt.datetime(2019, 9, 27)
     else:
         end_date = row['DateofTermination']
 
@@ -121,9 +121,11 @@ def count_seniority(row):
 
     return time_diff.days / 365.25
 
+
 def add_seniority(df):
-    df['Seniority'] = df.apply(lambda row: count_seniority(row),axis=1)
+    df['Seniority'] = df.apply(lambda row: count_seniority(row), axis=1)
     return df
+
 
 def analyze_recruitment_source_seniority(df):
     """
@@ -149,7 +151,8 @@ def analyze_recruitment_source_seniority(df):
         return
 
     # Grupujemy po źródle rekrutacji i obliczamy średni staż
-    seniority_by_source = df_cleaned.groupby('RecruitmentSource')['Seniority'].mean()
+    seniority_by_source = df_cleaned.groupby('RecruitmentSource')[
+        'Seniority'].mean()
 
     # Sortujemy wyniki malejąco
     seniority_by_source = seniority_by_source.sort_values(ascending=False)
@@ -159,15 +162,18 @@ def analyze_recruitment_source_seniority(df):
 
     # Wizualizacja
     plt.figure(figsize=(14, 8))
-    sns.barplot(x=seniority_by_source.index, y=seniority_by_source.values, palette='viridis')
+    sns.barplot(x=seniority_by_source.index,
+                y=seniority_by_source.values, palette='viridis')
     plt.title("Średni staż pracowników wg źródła rekrutacji", fontsize=16)
     plt.xlabel("Źródło Rekrutacji", fontsize=12)
     plt.ylabel("Średni Staż (lata)", fontsize=12)
-    plt.xticks(rotation=45, ha='right', fontsize=10) # Obrót etykiet dla czytelności
+    # Obrót etykiet dla czytelności
+    plt.xticks(rotation=45, ha='right', fontsize=10)
     plt.yticks(fontsize=10)
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
     plt.show()
+
 
 def analyze_martial_status_satisfaction_corelation(df):
     """
@@ -181,24 +187,105 @@ def analyze_martial_status_satisfaction_corelation(df):
         return
 
     # 1. Wyświetlenie surowych liczebności
-    satisfaction_counts = df_cleaned.groupby('MaritalDesc')['EmpSatisfaction'].value_counts().sort_index()
+    satisfaction_counts = df_cleaned.groupby(
+        'MaritalDesc')['EmpSatisfaction'].value_counts().sort_index()
     print("\n--- Surowe liczby pracowników dla każdego poziomu satysfakcji w zależności od stanu cywilnego ---")
     print(satisfaction_counts)
 
     # 2. Obliczenie procentowego rozkładu satysfakcji w obrębie każdej grupy stanu cywilnego
     # 'normalize=True' oblicza proporcje w obrębie grupy (na wiersz)
-    satisfaction_percentages = df_cleaned.groupby('MaritalDesc')['EmpSatisfaction'].value_counts(normalize=True).mul(100).unstack(fill_value=0)
+    satisfaction_percentages = df_cleaned.groupby('MaritalDesc')[
+        'EmpSatisfaction'].value_counts(normalize=True).mul(100).unstack(fill_value=0)
     # Posortowanie kolumn (poziomów satysfakcji) dla lepszej czytelności
-    satisfaction_percentages = satisfaction_percentages.reindex(columns=sorted(satisfaction_percentages.columns))
+    satisfaction_percentages = satisfaction_percentages.reindex(
+        columns=sorted(satisfaction_percentages.columns))
 
     print("\n--- Procentowy rozkład poziomów satysfakcji z pracy w zależności od stanu cywilnego (wiersze sumują się do 100%) ---")
     print(satisfaction_percentages.round(2))
 
     # 3. Wizualizacja procentowego rozkładu za pomocą heatmapy
     plt.figure(figsize=(12, 7))
-    sns.heatmap(satisfaction_percentages, annot=True, fmt=".1f", cmap="YlGnBu", linewidths=.5, cbar_kws={'label': 'Procent'})
-    plt.title('Procentowy rozkład satysfakcji z pracy w zależności od stanu cywilnego', fontsize=16)
-    plt.xlabel('Poziom Satysfakcji z Pracy (1=bardzo niska, 5=bardzo wysoka)', fontsize=12)
+    sns.heatmap(satisfaction_percentages, annot=True, fmt=".1f",
+                cmap="YlGnBu", linewidths=.5, cbar_kws={'label': 'Procent'})
+    plt.title(
+        'Procentowy rozkład satysfakcji z pracy w zależności od stanu cywilnego', fontsize=16)
+    plt.xlabel(
+        'Poziom Satysfakcji z Pracy (1=bardzo niska, 5=bardzo wysoka)', fontsize=12)
     plt.ylabel('Stan Cywilny', fontsize=12)
+    plt.tight_layout()
+    plt.show()
+
+
+def get_still_working_employees(df):
+    df = df.copy()
+    df = df.loc[df['EmploymentStatus'] == 'Active']
+    return df
+
+
+def calculate_age(born, reference_date):
+    if born.year > reference_date.year:  # Sprawdzanie czy data urodzenia nie jest z przyszłości
+        return None
+    return reference_date.year - born.year - ((reference_date.month, reference_date.day) < (born.month, born.day))
+
+
+def add_age(df, reference_date_str='2019-09-27'):
+    """Dodaje kolumnę 'Age' do DataFrame, obliczoną względem daty odniesienia.
+
+    Args:
+        df (pd.DataFrame): DataFrame zawierający dane pracowników.
+        reference_date_str (str): Data w formacie 'RRRR-MM-DD'. Domyślnie '2019-09-27'.
+    """
+    reference_date = pd.to_datetime(
+        reference_date_str).date()  # Konwersja na obiekt date
+    df['Age'] = df.apply(lambda row: calculate_age(
+        row['DOB'], reference_date), axis=1)
+    return df
+
+
+def analyse_age_still_working_employees(df):
+    working_employees = get_still_working_employees(df)
+    working_employees = add_age(working_employees)
+    # Usunięcie brakujących wartości wieku
+    working_employees = working_employees.dropna(subset=['Age'])
+    average_age = working_employees['Age'].mean()
+    youngest_age = working_employees['Age'].min()
+    oldest_age = working_employees['Age'].max()
+    print(f"Średni wiek pracowników: {average_age:.2f} lat")
+    print(f"Najmłodszy pracownik ma {youngest_age} lat")
+    print(f"Najstarszy pracownik ma {oldest_age} lat")
+
+    print(working_employees.groupby('Age')['EmpID'].count())
+
+    # Wizualizacja
+    plt.figure(figsize=(14, 8))
+    ax = sns.countplot(x='Age', data=working_employees,
+                       palette='viridis')  # Zapisujemy obiekt Axes
+
+    # Pobranie unikalnych, posortowanych wieków używanych na wykresie
+    unique_ages = sorted(working_employees['Age'].unique())
+
+    # Konwersja wartości wieku na indeksy na osi X
+    average_age_index = unique_ages.index(round(average_age)) if round(
+        average_age) in unique_ages else None  # zaokraglam wiek do int
+    youngest_age_index = unique_ages.index(youngest_age)
+    oldest_age_index = unique_ages.index(oldest_age)
+
+    plt.title('Liczba pracowników w zależności od wieku', fontsize=16)
+    plt.xlabel('Wiek', fontsize=12)
+    plt.ylabel('Liczba pracowników', fontsize=12)
+    plt.xticks(fontsize=10)
+    plt.yticks(fontsize=10)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+
+    # Dodanie linii pionowych dla średniego, minimalnego i maksymalnego wieku
+    if average_age_index is not None:
+        plt.axvline(x=average_age_index, color='red', linestyle='--',
+                    label=f'Średni wiek: {average_age:.2f}')
+    plt.axvline(x=youngest_age_index, color='green',
+                linestyle='-', label=f'Najmłodszy: {youngest_age}')
+    plt.axvline(x=oldest_age_index, color='blue', linestyle='-',
+                label=f'Najstarszy: {oldest_age}')
+
+    plt.legend()  # dodanie legendy
     plt.tight_layout()
     plt.show()
