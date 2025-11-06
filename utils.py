@@ -124,3 +124,47 @@ def count_seniority(row):
 def add_seniority(df):
     df['Seniority'] = df.apply(lambda row: count_seniority(row),axis=1)
     return df
+
+def analyze_recruitment_source_seniority(df):
+    """
+    Analizuje średni staż pracowników w zależności od źródła rekrutacji
+    i wizualizuje wyniki.
+
+    Args:
+        df (pd.DataFrame): DataFrame zawierający dane, z kolumną 'Seniority'.
+    """
+    if 'Seniority' not in df.columns:
+        print("Błąd: Kolumna 'Seniority' nie została znaleziona w DataFrame. Upewnij się, że funkcja add_seniority została wywołana.")
+        return
+
+    if 'RecruitmentSource' not in df.columns:
+        print("Błąd: Kolumna 'RecruitmentSource' nie została znaleziona w DataFrame.")
+        return
+
+    # Usunięcie wierszy z brakującymi danymi w Recruitment Source lub Seniority
+    df_cleaned = df.dropna(subset=['RecruitmentSource', 'Seniority'])
+
+    if df_cleaned.empty:
+        print("Brak danych do analizy stażu wg źródła rekrutacji po usunięciu brakujących wartości.")
+        return
+
+    # Grupujemy po źródle rekrutacji i obliczamy średni staż
+    seniority_by_source = df_cleaned.groupby('RecruitmentSource')['Seniority'].mean()
+
+    # Sortujemy wyniki malejąco
+    seniority_by_source = seniority_by_source.sort_values(ascending=False)
+
+    print("\nŚredni staż pracowników (w latach) wg źródła rekrutacji:")
+    print(seniority_by_source)
+
+    # Wizualizacja
+    plt.figure(figsize=(14, 8))
+    sns.barplot(x=seniority_by_source.index, y=seniority_by_source.values, palette='viridis')
+    plt.title("Średni staż pracowników wg źródła rekrutacji", fontsize=16)
+    plt.xlabel("Źródło Rekrutacji", fontsize=12)
+    plt.ylabel("Średni Staż (lata)", fontsize=12)
+    plt.xticks(rotation=45, ha='right', fontsize=10) # Obrót etykiet dla czytelności
+    plt.yticks(fontsize=10)
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.show()
