@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import chi2_contingency
+import datetime as dt
 
 
 def preprocess_data(df):
@@ -107,3 +108,19 @@ def analyze_manager_performance_chi2(df):
         print(f"Błąd podczas wykonywania testu Chi-Kwadrat: {e}")
         print("Prawdopodobnie tabela kontyngencji zawiera puste wiersze lub kolumny.")
         return None, None, None, None, None
+
+
+def count_seniority(row):
+
+    if pd.isnull(row['DateofTermination']):
+        end_date = dt.datetime(2019,9,27)
+    else:
+        end_date = row['DateofTermination']
+
+    time_diff = end_date - row['DateofHire']
+
+    return time_diff.days / 365.25
+
+def add_seniority(df):
+    df['Seniority'] = df.apply(lambda row: count_seniority(row),axis=1)
+    return df
