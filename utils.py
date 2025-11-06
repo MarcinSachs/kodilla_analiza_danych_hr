@@ -292,7 +292,7 @@ def analyse_age_still_working_employees(df):
 def analyse_project_count_by_age(df):
     # Podział na kategorie wiekowe
     bins = [27, 35, 42, 50]
-    labels = ['Młodzi (27-34)', 'Średni (35-41)', 'Starszy (42-50)']
+    labels = ['Młoda (27-34)', 'Średnia (35-41)', 'Starsza (42-50)']
     df['AgeGroup'] = pd.cut(df['Age'], bins=bins, labels=labels, right=False)
     # Obliczenie średniej liczby projektów dla każdej grupy wiekowej
     average_projects_by_age = df.groupby(
