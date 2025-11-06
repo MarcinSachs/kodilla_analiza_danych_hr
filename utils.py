@@ -239,30 +239,28 @@ def add_age(df, reference_date_str='2019-09-27'):
         reference_date_str).date()  # Konwersja na obiekt date
     df['Age'] = df.apply(lambda row: calculate_age(
         row['DOB'], reference_date), axis=1)
+    # Usunięcie brakujących wartości wieku
+    df = df.dropna(subset=['Age'])
     return df
 
 
 def analyse_age_still_working_employees(df):
-    working_employees = get_still_working_employees(df)
-    working_employees = add_age(working_employees)
-    # Usunięcie brakujących wartości wieku
-    working_employees = working_employees.dropna(subset=['Age'])
-    average_age = working_employees['Age'].mean()
-    youngest_age = working_employees['Age'].min()
-    oldest_age = working_employees['Age'].max()
+    average_age = df['Age'].mean()
+    youngest_age = df['Age'].min()
+    oldest_age = df['Age'].max()
     print(f"Średni wiek pracowników: {average_age:.2f} lat")
     print(f"Najmłodszy pracownik ma {youngest_age} lat")
     print(f"Najstarszy pracownik ma {oldest_age} lat")
 
-    print(working_employees.groupby('Age')['EmpID'].count())
+    print(df.groupby('Age')['EmpID'].count())
 
     # Wizualizacja
     plt.figure(figsize=(14, 8))
-    ax = sns.countplot(x='Age', data=working_employees,
+    ax = sns.countplot(x='Age', data=df,
                        palette='viridis')  # Zapisujemy obiekt Axes
 
     # Pobranie unikalnych, posortowanych wieków używanych na wykresie
-    unique_ages = sorted(working_employees['Age'].unique())
+    unique_ages = sorted(df['Age'].unique())
 
     # Konwersja wartości wieku na indeksy na osi X
     average_age_index = unique_ages.index(round(average_age)) if round(
@@ -286,6 +284,29 @@ def analyse_age_still_working_employees(df):
     plt.axvline(x=oldest_age_index, color='blue', linestyle='-',
                 label=f'Najstarszy: {oldest_age}')
 
-    plt.legend()  # dodanie legendy
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+def analyse_project_count_by_age(df):
+    # Podział na kategorie wiekowe
+    bins = [27, 35, 42, 50]
+    labels = ['Młodzi (27-34)', 'Średni (35-41)', 'Starszy (42-50)']
+    df['AgeGroup'] = pd.cut(df['Age'], bins=bins, labels=labels, right=False)
+    # Obliczenie średniej liczby projektów dla każdej grupy wiekowej
+    average_projects_by_age = df.groupby(
+        'AgeGroup')['SpecialProjectsCount'].mean()
+    print("\nŚrednia liczba projektów w zależności od grupy wiekowej:")
+    print(average_projects_by_age)
+
+    # Wizualizacja wyników
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=average_projects_by_age.index,
+                y=average_projects_by_age.values, palette='viridis')
+    plt.title('Średnia liczba projektów w zależności od grupy wiekowej')
+    plt.xlabel('Grupa Wiekowa')
+    plt.ylabel('Średnia liczba projektów')
+    plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()

@@ -20,3 +20,6 @@ Stan cywilny ma widoczny związek z rozkładem zadowolenia z pracy, a grupy taki
 Najmłodszy pracownik ma 27 lat, najstarszy 50 a średnia wieku osób aktualnie pracujących to 37,22 lat.
 
 5. Czy starsi pracownicy pracują nad większą liczbą specjalnych projektów niż młodsi pracownicy?
+Nie, to młodsi pracownicy pracują nad większą liczbą projektów specialnych.
+
+

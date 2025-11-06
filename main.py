@@ -34,7 +34,13 @@ def main():
     utils.analyze_martial_status_satisfaction_corelation(df)
 
     # Analiza struktury wieku pracowników
-    utils.analyse_age_still_working_employees(df)
+    working_employees = utils.get_still_working_employees(df)
+    working_employees = utils.add_age(working_employees)
+    utils.analyse_age_still_working_employees(working_employees)
+
+    # Analiza liczby projektów specialnych w zależności od wieku
+    utils.analyse_project_count_by_age(working_employees)
+
 
 if __name__ == "__main__":
     main()
