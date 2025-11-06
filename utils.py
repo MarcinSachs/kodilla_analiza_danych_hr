@@ -168,3 +168,12 @@ def analyze_recruitment_source_seniority(df):
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
     plt.show()
+
+def analyze_martial_status_satisfaction_corelation(df):
+    # Usunięcie wierszy z brakującymi danymi w MartialDesc lub EmpSatisfaction
+    df_cleaned = df.dropna(subset=['MaritalDesc', 'EmpSatisfaction'])
+    if df_cleaned.empty:
+        print("Brak danych do analizy po usunięciu brakujących wartości.")
+        return
+    # Grupowanie
+    satisfaction_groups = df_cleaned.groupby('MaritalDesc')['EmpSatisfaction'].value_counts()

@@ -30,6 +30,9 @@ def main():
     # Analiza stażu
     utils.analyze_recruitment_source_seniority(df)
 
+    
+    print(utils.analyze_martial_status_satisfaction_corelation(df))
+
 
 
 if __name__ == "__main__":
